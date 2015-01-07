@@ -1,61 +1,60 @@
 require "roman_numerals/version"
 
 class RomanNumeral
-  attr_reader :characters
-  def initialize(characters)
+  attr_reader :characters, :tokens, :segment_class, :character_class
+  def initialize(characters, segment_class=RomanSegment, character_class=RomanCharacter)
     @characters = characters
+    @tokens = tokenize(characters)
+    @segment_class = segment_class
+    @character_class = character_class
   end
 
   def to_i
-    tokenize(characters).inject(0, &roman_arithmatic)
+    tokens.map{|s| segment_class.new(s).value}.inject(:+)
   end
 
   private
 
-  def roman_arithmatic
-    lambda do |total, segment|
-      total + RomanSegment.new(segment).value
-    end
-  end
-
   def tokenize(characters)
     characters.chars.slice_when do |before, after|
-      first = RomanCharacter.value_for(before)
-      second = RomanCharacter.value_for(after)
+      first = character_class.value_for(before)
+      second = character_class.value_for(after)
       first >= second
     end
   end
 end
 
 class RomanSegment
-  def self.new(segment)
+  def self.new(segment, character_class=RomanCharacter)
     if segment.size > 1
-      SubtractiveSegment.new(segment)
+      SubtractiveSegment.new(segment, character_class)
     else
-      AdditiveSegment.new(segment)
+      AdditiveSegment.new(segment, character_class)
     end
   end
 end
 
 class AdditiveSegment
-  attr_reader :segment
-  def initialize(segment)
+  attr_reader :segment, :character_class
+  def initialize(segment, character_class)
     @segment = segment
+    @character_class = character_class
   end
 
   def value
-    RomanCharacter.values_for(segment).first
+    character_class.values_for(segment).first
   end
 end
 
 class SubtractiveSegment
-  attr_reader :segment
-  def initialize(segment)
+  attr_reader :segment, :character_class
+  def initialize(segment, character_class)
     @segment = segment
+    @character_class = character_class
   end
 
   def value
-    first, second = *RomanCharacter.values_for(segment)
+    first, second = *character_class.values_for(segment)
     second - first
   end
 end
