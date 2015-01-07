@@ -13,13 +13,8 @@ class RomanNumeral
   private
 
   def roman_arithmatic
-    lambda do |total, slice|
-      if slice.size > 1
-        first, second = *RomanCharacter.values_for(slice)
-        total + (second - first)
-      else
-        total + RomanCharacter.value_for(slice.first)
-      end
+    lambda do |total, segment|
+      total + RomanSegment.new(segment).value
     end
   end
 
@@ -29,6 +24,39 @@ class RomanNumeral
       second = RomanCharacter.value_for(after)
       first >= second
     end
+  end
+end
+
+class RomanSegment
+  def self.new(segment)
+    if segment.size > 1
+      SubtractiveSegment.new(segment)
+    else
+      AdditiveSegment.new(segment)
+    end
+  end
+end
+
+class AdditiveSegment
+  attr_reader :segment
+  def initialize(segment)
+    @segment = segment
+  end
+
+  def value
+    RomanCharacter.values_for(segment).first
+  end
+end
+
+class SubtractiveSegment
+  attr_reader :segment
+  def initialize(segment)
+    @segment = segment
+  end
+
+  def value
+    first, second = *RomanCharacter.values_for(segment)
+    second - first
   end
 end
 
