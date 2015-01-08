@@ -1,3 +1,7 @@
+class RomanNumeralToken
+
+end
+
 class RomanNumeralTokenizer
   attr_reader :characters, :character_class
   def initialize(characters, character_class)
@@ -6,7 +10,7 @@ class RomanNumeralTokenizer
   end
 
   def call
-    match = characters.match(/^(\(.*?\))?(.*?)$/)
+    match = characters.match(/^(\(.*?\))?(\w*?)$/)
     large_numbers  = Array(match[1])
     small_numbers  = Array(match[2].chars
     .slice_when(&small_number_first))

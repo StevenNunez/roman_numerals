@@ -55,5 +55,8 @@ describe RomanNumerals do
 
   end
   it "supports nested RomanNumerals" do
+    expect(RomanNumeral.new("((XV)MDCCLXXV)MMCCXVI").to_i).to eq(16777216)
+    expect(RomanNumeral.new("((CCCX)MMMMCLIX)CCLXV").to_i).to eq(314159265)
+    expect(RomanNumeral.new("((MLXX)MMMDCCXL)MDCCCXXIV").to_i).to eq(1073741824)
   end
 end
