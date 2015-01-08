@@ -95,7 +95,7 @@ class RomanCharacter
 
   def self.values_for(characters)
     characters.map do |character|
-      Object.const_get("#{self}::#{character}")
+      value_for(character)
     end
   end
 end
