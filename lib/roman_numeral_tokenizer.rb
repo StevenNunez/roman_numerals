@@ -1,7 +1,3 @@
-class RomanNumeralToken
-
-end
-
 class RomanNumeralTokenizer
   attr_reader :characters, :character_class
   def initialize(characters, character_class)
