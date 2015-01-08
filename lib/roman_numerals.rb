@@ -4,9 +4,10 @@ class RomanNumeral
   attr_reader :characters, :tokens, :segment_class, :character_class
   def initialize(characters, segment_class=RomanSegment, character_class=RomanCharacter)
     @characters = characters
-    @tokens = tokenize(characters)
     @segment_class = segment_class
     @character_class = character_class
+
+    @tokens = tokenize(characters)
   end
 
   def to_i
@@ -17,16 +18,26 @@ class RomanNumeral
 
   def tokenize(characters)
     characters.chars.slice_when do |before, after|
-      first = character_class.value_for(before)
-      second = character_class.value_for(after)
-      first >= second
+      if before == '(' || after ==')'
+        false
+      elsif before == ')'
+        true
+      else
+        first = character_class.value_for(before)
+        second = character_class.value_for(after)
+        first >= second
+      end
     end
+    RomanNumeralTokenizer.call(characters, character_class)
   end
 end
 
 class RomanSegment
   def self.new(segment, character_class=RomanCharacter)
-    if segment.size > 1
+    case segment
+    when ProductiveSegment.new(segment, character_class)
+      ProductiveSegment.new(segment, character_class)
+    when SubtractiveSegment.new(segment, character_class)
       SubtractiveSegment.new(segment, character_class)
     else
       AdditiveSegment.new(segment, character_class)
@@ -56,6 +67,27 @@ class SubtractiveSegment
   def value
     first, second = *character_class.values_for(segment)
     second - first
+  end
+
+  def ===(other)
+    other.first != '(' &&  other.size > 1
+  end
+end
+
+class ProductiveSegment
+  attr_reader :segment, :character_class
+  def initialize(segment, character_class)
+    @segment = segment.first
+    @character_class = character_class
+  end
+
+  def value
+    result = RomanNumeral.new(segment[1..-2]).to_i
+    result * 1000
+  end
+
+  def ===(other)
+    other[0].start_with?('(')
   end
 end
 
