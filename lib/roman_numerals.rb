@@ -17,17 +17,6 @@ class RomanNumeral
   private
 
   def tokenize(characters)
-    characters.chars.slice_when do |before, after|
-      if before == '(' || after ==')'
-        false
-      elsif before == ')'
-        true
-      else
-        first = character_class.value_for(before)
-        second = character_class.value_for(after)
-        first >= second
-      end
-    end
     RomanNumeralTokenizer.call(characters, character_class)
   end
 end

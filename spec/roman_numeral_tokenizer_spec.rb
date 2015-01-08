@@ -41,7 +41,7 @@ describe RomanNumeralTokenizer do
   it "groups multiple characters in parenthesis as 1 unit" do
     tokens = RomanNumeralTokenizer.call("(CCCX)MMMM", FakeCharacterClass)
     expect(tokens.length).to eq(5)
-    expect(tokens).to eq([['(V)']])
+    expect(tokens).to eq([["(CCCX)"], ["M"], ["M"], ["M"], ["M"]])
   end
 
 end
