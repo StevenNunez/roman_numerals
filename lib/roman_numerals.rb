@@ -1,60 +1,49 @@
-require "roman_numerals/version"
-
-class RomanNumeral
-  attr_reader :characters, :tokens, :segment_class, :character_class
-  def initialize(characters, segment_class=RomanSegment, character_class=RomanCharacter)
+class RomanNumeralConverter
+  attr_reader :characters, :tokens, :calculator, :character_map, :tokenizer
+  def initialize(characters, calculator=RomanCalculator, character_map=RomanCharacterMap, tokenizer=RomanNumeralTokenizer)
     @characters = characters
-    @segment_class = segment_class
-    @character_class = character_class
-
-    @tokens = tokenize(characters)
+    @calculator = calculator
+    @character_map = character_map
+    @tokenizer = tokenizer
   end
 
   def to_i
-    tokens.map{|s| segment_class.new(s).value}.inject(:+)
-  end
-
-  private
-
-  def tokenize(characters)
-    RomanNumeralTokenizer.call(characters, character_class)
+    tokenizer.call(characters,self)
+    .map{|s| calculator.new(s, self).value}
+    .inject(:+)
   end
 end
 
-class RomanSegment
-  def self.new(segment, character_class=RomanCharacter)
+class RomanCalculator
+  def self.new(segment, converter)
     case segment
-    when ProductiveSegment.new(segment, character_class)
-      ProductiveSegment.new(segment, character_class)
-    when SubtractiveSegment.new(segment, character_class)
-      SubtractiveSegment.new(segment, character_class)
+    when ProductiveSegment.new(segment, converter)
+      ProductiveSegment.new(segment, converter)
+    when SubtractiveSegment.new(segment, converter)
+      SubtractiveSegment.new(segment, converter)
     else
-      AdditiveSegment.new(segment, character_class)
+      AdditiveSegment.new(segment, converter)
     end
   end
 end
 
-class AdditiveSegment
-  attr_reader :segment, :character_class
-  def initialize(segment, character_class)
+class ComputationalSegment
+  attr_reader :segment, :converter
+  def initialize(segment, converter)
     @segment = segment
-    @character_class = character_class
-  end
-
-  def value
-    character_class.values_for(segment).first
+    @converter = converter
   end
 end
 
-class SubtractiveSegment
-  attr_reader :segment, :character_class
-  def initialize(segment, character_class)
-    @segment = segment
-    @character_class = character_class
-  end
-
+class AdditiveSegment < ComputationalSegment
   def value
-    first, second = *character_class.values_for(segment)
+    converter.character_map.values_for(segment).first
+  end
+end
+
+class SubtractiveSegment < ComputationalSegment
+  def value
+    first, second = *converter.character_map.values_for(segment)
     second - first
   end
 
@@ -63,15 +52,9 @@ class SubtractiveSegment
   end
 end
 
-class ProductiveSegment
-  attr_reader :segment, :character_class
-  def initialize(segment, character_class)
-    @segment = segment.first
-    @character_class = character_class
-  end
-
+class ProductiveSegment < ComputationalSegment
   def value
-    result = RomanNumeral.new(segment[1..-2]).to_i
+    result = converter.class.new(segment.first[1..-2]).to_i
     result * 1000
   end
 
@@ -80,17 +63,20 @@ class ProductiveSegment
   end
 end
 
-class RomanCharacter
-  I = 1
-  V = 5
-  X = 10
-  L = 50
-  C = 100
-  D = 500
-  M = 1000
+class RomanCharacterMap
+
+  MAP = {
+    "I" => 1,
+    "V" => 5,
+    "X" => 10,
+    "L" => 50,
+    "C" => 100,
+    "D" => 500,
+    "M" => 1000
+  }
 
   def self.value_for(character)
-    Object.const_get("#{self}::#{character}")
+    MAP.fetch(character)
   end
 
   def self.values_for(characters)

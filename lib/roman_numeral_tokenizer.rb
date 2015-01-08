@@ -1,8 +1,8 @@
 class RomanNumeralTokenizer
-  attr_reader :characters, :character_class
-  def initialize(characters, character_class)
+  attr_reader :characters, :converter
+  def initialize(characters, converter)
     @characters = characters
-    @character_class = character_class
+    @converter = converter
   end
 
   def call
@@ -18,15 +18,15 @@ class RomanNumeralTokenizer
     end
   end
 
-  def self.call(characters, character_class)
-    new(characters, character_class).call
+  def self.call(characters, converter)
+    new(characters, converter).call
   end
 
   private
   def small_number_first
     lambda do |before, after|
-      first = character_class.value_for(before)
-      second = character_class.value_for(after)
+      first = converter.character_map.value_for(before)
+      second = converter.character_map.value_for(after)
       first >= second
     end
   end
