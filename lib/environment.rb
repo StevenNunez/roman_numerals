@@ -1,4 +1,4 @@
-require 'roman_numeral_converter'
-require 'roman_numeral_tokenizer'
-require 'roman_numeral_calculator'
-require 'roman_numeral_character_map'
+require 'roman_numeral/converter'
+require 'roman_numeral/tokenizer'
+require 'roman_numeral/calculator'
+require 'roman_numeral/character_map'
